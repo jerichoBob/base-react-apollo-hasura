@@ -57,7 +57,6 @@ const QUERY_GET_PEOPLE = gql`
 `;
 
 const ImportantPeople = () => {
-  // let [clientList, setClientList] = useState([]);
 
   const { loading, error, data, networkStatus } = useQuery(
     QUERY_GET_PEOPLE, {
@@ -66,7 +65,6 @@ const ImportantPeople = () => {
   if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
   if (loading) return null;
   if (error) return `Error! ${error}`;
-  // setClientList(data);
 
   return (
       <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
