@@ -32,6 +32,10 @@ const QUERY_GET_PEOPLE = gql`
  * @returns 
  */
 const getClients = () => {
+
+}
+
+const ImportantPeople = () => {
   const { loading, error, data, networkStatus } = useQuery(
     QUERY_GET_PEOPLE, {
     notifyOnNetworkStatusChange: true,
@@ -39,10 +43,6 @@ const getClients = () => {
   if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
   if (loading) return null;
   if (error) return `Error! ${error}`;
-
-}
-
-const ImportantPeople = () => {
 
 
   return data.people.map((person) => (
