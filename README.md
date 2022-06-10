@@ -24,3 +24,21 @@ The tech stack so far looks like this:
   * don't forget to set the headers or you won't be able to access the data
 * ReactMD - because I like the clean look of MD and these components
 
+# Features
+
+* description of dress
+* work type / occasion / source
+  * Wedding
+  * Debutante
+  * Kannons
+* job type
+  * simple alteration
+  * custom fit
+  * hours estimated
+    * range of times based on previous jobs to select from
+  * actual hours spent
+  * $ amount
+    * estimated $ amount for the job
+    * actual $ amount spent for the job 
+    * calculate $/hr rate (for job type)
+* gallery

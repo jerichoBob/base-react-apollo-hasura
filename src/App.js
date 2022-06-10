@@ -1,44 +1,41 @@
 import './App.scss';
 
-import React, {  } from 'react';
+import React, { useState } from 'react';
 import {
   ApolloClient,
   InMemoryCache, useQuery,
   gql,
   NetworkStatus
 } from "@apollo/client";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import { ClientDetails } from './ClientDetails';
 
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Paper from '@mui/material/Paper';
-
-import { red } from '@mui/material/colors';
 import Stack from '@mui/material/Stack';
 
-import Typography from '@mui/material/Typography';
+
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
   padding: theme.spacing(1),
-  textAlign: 'center',
+  // textAlign: 'center',
   color: theme.palette.text.secondary,
 }));
+
 
 export const client = new ApolloClient({
   uri: 'https://exciting-mammal-78.hasura.app/v1/graphql',
@@ -52,108 +49,94 @@ export const client = new ApolloClient({
 
 const QUERY_GET_PEOPLE = gql`
     query MyQuery {
-      people {index, first_name, last_name}
+      people {
+        index
+        first_name
+        last_name
+        address_street_number
+        address_street_name
+        address_city
+        address_state
+        address_zip
+        birth_month
+        birth_day
+        birth_year
+      }
     }
 `;
 
-const ImportantPeople = () => {
+// eslint-disable-next-line
+// const handleClientSelection = (people, index) => {
+//   console.log(`index[${index}]: ${people[index].first_name}`);
+// }
+
+const ImportantPeople = (props) => {
 
   const { loading, error, data, networkStatus } = useQuery(
     QUERY_GET_PEOPLE, {
     notifyOnNetworkStatusChange: true,
   });
+
   if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
   if (loading) return null;
   if (error) return `Error! ${error}`;
 
   return (
-      <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-      divider={<Divider  flexItem />}
+      <List 
+        sx={{
+          width: '100%',
+          maxWidth: 360,
+          maxHeight: 200,
+          bgcolor: 'background.paper',
+          position: 'relative',
+          overflow: 'auto',
+          '& ul': { padding: 0 },
+        }}
+        subheader={<li />}
+        divider={<Divider  flexItem />}
       >
-        {data.people.map((person,index, array) => {
+        {data.people.map((person, ndx, array) => {
           return(
-          <div key={index}>
-          <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemText primary={`${index} :: ${person.first_name} ${person.last_name}`} />
-          </ListItemButton>
-        </ListItem>
-        {person.index < array.length && <Divider  component="li" />}
-        
-        
-          
-        </div> );         
-      })}
+          <div key={person.index}>
+            <ListItem disablePadding>
+              <ListItemButton
+                // onClick={(event) => handleClientSelection(data.people, ndx)}
+                onClick={() => props.setClient(data.people[ndx])}
+              >
+                <ListItemText primary={`${person.first_name} ${person.last_name}`} />
+              </ListItemButton>
+            </ListItem>
+            {person.index < array.length && <Divider  component="li" />}
+          </div> );         
+        })}
       </List>
-      
-
-
   );
 };
 
-const ClientDetails = () => (
-
-  <Card sx={{ width: 345 }}>
-
-    <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="client-details">
-            R
-          </Avatar>
-        }
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-        title="Shrimp and Chorizo Paella"
-        subheader="September 14, 2016"
-      />
-    <CardContent>
-      <Typography> Here is some text to display in the card. It is assumed this sentence will end.</Typography>
-    </CardContent>
-    <CardActions>
-      <Button>Action 1</Button>
-      <Button>Action 2</Button>
-    </CardActions>
-  </Card>
-);
 
 export const App = () => {
 
+  const [client, setClient] = useState(null);
+
   return(
     <Box sx={{ width: '100%', maxWidth: 700, bgcolor: 'background.paper', border: '1px dashed grey' }}>
-
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       divider={<Divider orientation="vertical" flexItem />}
-
       spacing={{ xs: 1, sm: 2, md: 4 }}
     >
       <Item>
-      {/* <CardHeader>
-        <Typography variant="body2" color="text.secondary">
-          Application 🚀
-        </Typography>        
-      </CardHeader>    
-
-      <CardContent> */}
-        <Card sx={{ width: 345 }}>
-          <CardHeader>
-            <Typography component="div" variant="h5">
-              Clients
-            </Typography>                    
-          </CardHeader>        
+        <Card sx={{ width: 345 }} >
+          <CardHeader title="Clients" />
           <CardContent>
-            <ImportantPeople />
+            <ImportantPeople setClient={setClient}/>
           </CardContent>
         </Card>
-        </Item>
+      </Item>
         
-        <Item>
-          <ClientDetails/>
-        </Item>
-      {/* </CardContent> */}
+      <Item sx={{ bgcolor: 'white'}}>
+        <ClientDetails client={client}/>
+      </Item>
     </Stack>
     </Box>
   );
