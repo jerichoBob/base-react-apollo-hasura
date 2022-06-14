@@ -12,10 +12,6 @@ export const ClientDialog = (props) => {
       onClose(client);
     };
   
-    const handleListItemClick = (value) => {
-      onClose(value);
-    };
-  
     return (
         <Dialog onClose={handleClose} open={open} maxWidth={'md'}>
             <DialogTitle>Create New Client</DialogTitle>
