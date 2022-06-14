@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 
-import { Button, Dialog, DialogTitle } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { ClientGrid }   from './ClientGrid';
 
 
@@ -21,14 +21,26 @@ export const ClientDialog = (props) => {
             <DialogTitle>Create New Client</DialogTitle>
 
             <ClientGrid client={client} setClient={setClient}/>
-            <Button 
-              variant="contained"
-              sx={{ xs: 12, sm: 12, m: 1, width: '25%' }}
-
-              onClick={() => {onSubmit(client)}}
+            <DialogActions>
+              <Button
+                variant="outlined"
+                onClick={() => {handleClose()}}
+                sx={{ xs: 12, sm: 12, m: 1, width: '25%' }}
+                // color="secondary"
               >
-                Add Client
-            </Button>
+                Cancel
+              </Button>
+              <Button 
+                variant="contained"
+                sx={{ xs: 12, sm: 12, m: 1, width: '25%' }}
+
+                onClick={() => {onSubmit(client)}}
+                >
+                  Add Client
+              </Button>              
+            </DialogActions>
+
+
         </Dialog>
     );
 };

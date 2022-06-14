@@ -13,9 +13,12 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+
 import { ClientDetails } from './ClientDetails';
+import { ClientDialog } from './ClientDialog';
 
 import { styled } from '@mui/material/styles';
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -29,7 +32,6 @@ import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 
-import { ClientDialog } from './ClientDialog';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -93,11 +95,6 @@ mutation insert_person {
 
 `;
 
-// eslint-disable-next-line
-// const handleClientSelection = (people, index) => {
-//   console.log(`index[${index}]: ${people[index].first_name}`);
-// }
-
 const ImportantPeople = (props) => {
 
   const { loading, error, data, networkStatus } = useQuery(
@@ -141,17 +138,11 @@ const ImportantPeople = (props) => {
   );
 };
 
-const emails = ['username@gmail.com', 'user02@gmail.com'];
-
 export const App = () => {
 
   const [ selectedClient, setSelectedClient ] = useState(null);
   const [ newClient, setNewClient ] = useState({});
   const [ isVisible, setVisibility ] = useState(false);
-
-  const handleClickOpen = () => {
-    setVisibility(true);
-  };
 
   const handleClose = (value) => {
     setVisibility(false);

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import { Box, Card, Grid, Paper, TextField } from '@mui/material';
+import { Box, Grid, TextField } from '@mui/material';
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -45,8 +45,8 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
             />
           </Grid>
       </Grid>
-      <Grid container fullWidth={true}>
-        <Grid item fullWidth={true} >
+      <Grid container>
+        <Grid item >
           <TextField
             fullWidth={true}
             // sx={{ m: 1, width: '100%' }}

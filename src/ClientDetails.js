@@ -1,9 +1,5 @@
 
 
-// eslint-disable-next-line
-import { palette } from '@mui/system';
-// eslint-disable-next-line
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
