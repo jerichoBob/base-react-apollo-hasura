@@ -1,16 +1,7 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import { Box, Grid, TextField } from '@mui/material';
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  // padding: theme.spacing(1),
-  // textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
   
-  export const ClientGrid = (props) => {
+export const ClientGrid = (props) => {
     const { client, setClient } = props;
     return (
       <Box sx={{ 
@@ -18,12 +9,6 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
         flexWrap: 'wrap' ,   
         '& .MuiTextField-root': { m: 1, width: '30ch' }
       }}
-        // component="form"
-        // sx={{
-        //   '& .MuiTextField-root': { m: 1, width: '30ch' },
-        // }}
-        // noValidate
-        // autoComplete="off"
       >
         <Grid container >
           <Grid item >
