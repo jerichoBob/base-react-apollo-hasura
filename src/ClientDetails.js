@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 
 
 export const ClientDetails = (props) => {
+    const clientDetails = props.client;
     return (
         <Box sx={{ width: 345, maxWidth: 500 }}>
 
@@ -19,22 +20,22 @@ export const ClientDetails = (props) => {
           Name
         </Typography>
 
-        {props.client !== null &&
-            <Typography variant="body1" gutterBottom component="div" style={{'margin-left':25}}>
-                {props.client.first_name} {props.client.last_name}
+        {clientDetails !== null &&
+            <Typography variant="body1" gutterBottom component="div" style={{'marginLeft':25}}>
+                {clientDetails.first_name} {clientDetails.last_name}
             </Typography>
         }
         <Typography variant="h6" gutterBottom component="div">
           Address
         </Typography>
-        {props.client !== null &&
-            <div style={{'margin-left':25}}>
+        {clientDetails !== null &&
+            <div style={{'marginLeft':25}}>
             {/* <div style={margin:(110,10,20,30)}> */}
                 <Typography variant="body1" gutterBottom component="div">
-                    {props.client.address_street_number}  {props.client.address_street_name}
+                    {clientDetails.address_street}
                 </Typography>
                 <Typography variant="body1" gutterBottom component="div">
-                    {props.client.address_city} {props.client.address_state} {props.client.address_zip}  
+                    {clientDetails.address_city} {clientDetails.address_state} {clientDetails.address_zip}  
                 </Typography>
             </div>
 
@@ -42,9 +43,9 @@ export const ClientDetails = (props) => {
         <Typography variant="h6" gutterBottom component="div">
           Date of Birth
         </Typography>
-        {props.client !== null &&
-            <Typography variant="body1" gutterBottom component="div" style={{'margin-left':25}}>
-                {props.client.birth_month}.{props.client.birth_day}.{props.client.birth_year}
+        {clientDetails !== null &&
+            <Typography variant="body1" gutterBottom component="div" style={{'marginLeft':25}}>
+                {clientDetails.birth_month}.{clientDetails.birth_day}.{clientDetails.birth_year}
             </Typography>
         }
     </Box>        
