@@ -44,7 +44,7 @@ export const ClientDialog = (props) => {
 ClientDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
-    client: PropTypes.object.isRequired,
+    client: PropTypes.object,
     setClient: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
 };

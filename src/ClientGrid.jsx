@@ -3,6 +3,9 @@ import { Box, Grid, TextField } from '@mui/material';
   
 export const ClientGrid = (props) => {
     const { client, setClient } = props;
+    // console.log("ClientGrid:client",JSON.stringify(client));
+    console.log("ClientGrid:client.first_name:",client.first_name);
+
     return (
       <Box sx={{ 
         display: 'flex', 
@@ -14,10 +17,11 @@ export const ClientGrid = (props) => {
           <Grid item >
             <TextField 
               required
+              sx={{ width: '10%' }}
               id="first-name"
               label="First Name"
-              defaultValue={client.firstName}
-              onChange={(e) => setClient({ ...client, firstName: e.target.value })}
+              value={client.first_name}
+              onChange={(e) => setClient({ ...client, first_name: e.target.value })}
             />
           </Grid>
           <Grid item >
@@ -25,8 +29,8 @@ export const ClientGrid = (props) => {
               id="last-name"
               required
               label="Last Name"
-              defaultValue={client.lastName}
-              onChange={(e) => setClient({ ...client, lastName: e.target.value })}
+              value={client.last_name}
+              onChange={(e) => setClient({ ...client, last_name: e.target.value })}
             />
           </Grid>
       </Grid>
@@ -34,11 +38,10 @@ export const ClientGrid = (props) => {
         <Grid item >
           <TextField
             fullWidth={true}
-            // sx={{ m: 1, width: '100%' }}
-            size='medium'
+            size='small'
             id="address-street"
             label="Street"
-            defaultValue={client.address_street}
+            value={client.address_street}
             onChange={(e) => setClient({ ...client, address_street: e.target.value })}
           />
         </Grid>
@@ -48,7 +51,7 @@ export const ClientGrid = (props) => {
           <TextField
             id="address-city"
             label="City"
-            defaultValue={client.address_city}
+            value={client.address_city}
             onChange={(e) => setClient({ ...client, address_city: e.target.value })}
           />
         </Grid>
@@ -56,7 +59,7 @@ export const ClientGrid = (props) => {
           <TextField
             id="address-state"
             label="State"
-            defaultValue={client.address_state}
+            value={client.address_state}
             onChange={(e) => setClient({ ...client, address_state: e.target.value })}            
           />
         </Grid>
@@ -64,7 +67,7 @@ export const ClientGrid = (props) => {
           <TextField
             id="address-zip"
             label="Zipcode"
-            defaultValue={client.address_zip}
+            value={client.address_zip}
             onChange={(e) => setClient({ ...client, address_zip: e.target.value })}
           />        
         </Grid> 
@@ -74,7 +77,7 @@ export const ClientGrid = (props) => {
           <TextField 
             id="birth-month" 
             label="Month" 
-            defaultValue={client.birth_month}
+            value={client.birth_month}
             onChange={(e) => setClient({ ...client, birth_month: e.target.value })}
           />
         </Grid>
@@ -82,7 +85,7 @@ export const ClientGrid = (props) => {
           <TextField 
             id="birth-day" 
             label="Day" 
-            defaultValue={client.birth_day}
+            value={client.birth_day}
             onChange={(e) => setClient({ ...client, birth_day: e.target.value })}
           />
         </Grid>
@@ -90,7 +93,7 @@ export const ClientGrid = (props) => {
           <TextField 
             id="birth-year" 
             label="Year" 
-            defaultValue={client.birth_year}
+            value={client.birth_year}
             onChange={(e) => setClient({ ...client, birth_year: e.target.value })}
           />                
         </Grid>

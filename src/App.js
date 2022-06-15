@@ -1,6 +1,6 @@
 import './App.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ApolloClient,
   InMemoryCache, 
@@ -32,6 +32,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 
+import { faker } from '@faker-js/faker';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -70,41 +71,53 @@ const QUERY_GET_PEOPLE = gql`
     }
 `;
 const MUTATION_ADD_PERSON = gql`
-mutation insert_person {
+  mutation insert_person (
+    $first_name: String!, 
+    $last_name: String!, 
+    $address_street: String, 
+    $address_state: String, 
+    $address_city: String, 
+    $address_zip: Int, 
+    $birth_day: Int, 
+    $birth_month: Int, 
+    $birth_year: Int) {
   insert_people_one(object: {
-    first_name: "Billy", 
-    last_name: "Batson", 
-    address_street: "123 Derelict Ct", 
-    address_state: "MT", 
-    address_city: "Bozeman", 
-    address_zip: 17172, 
-    birth_day: 10, 
-    birth_month: 10, 
-    birth_year: 1904}) {
-    first_name
-    last_name
-    address_street
-    address_city
-    address_state
-    address_zip
-    birth_day
-    birth_month
-    birth_year
+    first_name: $first_name,
+    last_name: $last_name
+    address_street: $address_street,
+    address_city: $address_city,
+    address_state: $address_state,
+    address_zip: $address_zip,
+    birth_day: $birth_day,
+    birth_month: $birth_month,
+    birth_year: $birth_year
+  }) {
+      index
   }
 }
 
 `;
 
-const ImportantPeople = (props) => {
-
+const ClientList = (props) => {
+  const {setClientIndex, clientList, setClientList} = props;
   const { loading, error, data, networkStatus } = useQuery(
     QUERY_GET_PEOPLE, {
     notifyOnNetworkStatusChange: true,
   });
+  const [selectedListIndex, setSelectedListIndex] = useState(1);
 
+  useEffect(() => {
+    if (data !== undefined && data.people !== undefined) {
+      // console.log("ClientList: useEffect: data: " + JSON.stringify(data));
+      setClientIndex(data.people[0].index);
+      setClientList(data.people);
+    }
+  }, [ setClientList, setClientIndex, data ]);
+  
   if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
   if (loading) return null;
   if (error) return `Error! ${error}`;
+
 
   return (
       <List 
@@ -126,33 +139,68 @@ const ImportantPeople = (props) => {
             <ListItem disablePadding>
               <ListItemButton
                 // onClick={(event) => handleClientSelection(data.people, ndx)}
-                onClick={() => props.setSelectedClient(data.people[ndx])}
+                onClick={() => {
+                  // console.log("ClientList: onClick: " + JSON.stringify(person));
+                  // console.log(JSON.stringify(person.index));
+                  props.setClientIndex(person.index)
+                  setSelectedListIndex(person.index);
+                }}
+                selected={selectedListIndex === person.index}
               >
                 <ListItemText primary={`${person.first_name} ${person.last_name}`} />
               </ListItemButton>
             </ListItem>
-            {person.index < array.length && <Divider  component="li" />}
+            {person.index < array.length && <Divider component="li" />}
           </div> );         
         })}
       </List>
   );
 };
 
+const handleNewClientButtonClick = (event, createClient, setClientIndex) => {
+  // console.log('handleNewClientButtonClick');
+
+  const index = createClient({ variables: {
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    // address_street: "", 
+    // address_state: "", 
+    // address_city: "", 
+    // address_zip: 17172, 
+    // birth_day: 10, 
+    // birth_month: 10, 
+    // birth_year: 1904
+  //  })}.then(result => {  
+  //   console.log(result);
+  // } 
+  }});
+  // console.log("handleNewClientButtonClick: index: " + index);
+  setClientIndex(index);
+
+}
+
+const onSubmit = (event, createClient) => {}
+
 export const App = () => {
 
-  const [ selectedClient, setSelectedClient ] = useState(null);
-  const [ newClient, setNewClient ] = useState({});
-  const [ isVisible, setVisibility ] = useState(false);
+  const [ clientIndex, setClientIndex ] = useState(0); 
+  const [ clientList, setClientList ] = useState([]);
+  const [ displayedClient, setDisplayedClient ] = useState({
+    first_name: "",
+    last_name: "",
+    address_street: "",
+    address_city: "",
+    address_state: "",
+  });
 
-  const handleClose = (value) => {
-    setVisibility(false);
-    setNewClient(value);
-  };
+  const [ createClient, { data, loading, error }] = useMutation(MUTATION_ADD_PERSON);
 
-  // onSubmit handles the mutation of the backend data
-  const onSubmit = () => {
 
-  }
+  useEffect(() => {
+    const person = clientList.find(thisClient => thisClient.index === clientIndex);
+    console.log("=== App: useEffect: person: " + JSON.stringify(person));
+    setDisplayedClient(person);
+  }, [ clientIndex, clientList ]);
 
   return(
     <Box sx={{ width: '100%', maxWidth: 800, bgcolor: 'background.paper', border: '1px dashed grey' }}>
@@ -165,27 +213,26 @@ export const App = () => {
         <Card sx={{ width: 345 }} >
           <CardHeader title="Clients" />
           <CardContent>
-            <ImportantPeople setSelectedClient={setSelectedClient}/>
+            <ClientList 
+              setClientIndex={setClientIndex} 
+              clientList={clientList} 
+              setClientList={setClientList}/>
+            <Button 
+              variant="contained"
+              onClick={(e) => {handleNewClientButtonClick(e, createClient, setClientIndex)}}
+              >New Client
+            </Button>              
           </CardContent>
         </Card>
       </Item>
         
-      <Item sx={{ bgcolor: 'white'}}>
-        <ClientDetails client={selectedClient}/>
+      <Item>
+        <ClientDetails 
+          client={displayedClient}
+          setClient={setDisplayedClient}
+        />
       </Item>
     </Stack>
-    <Button 
-      variant="contained"
-      onClick={() => {setVisibility(!isVisible)}}
-      >Add Client
-    </Button>
-    <ClientDialog
-        open={isVisible}
-        onClose={handleClose}
-        client={newClient}
-        setClient={setNewClient}
-        onSubmit={onSubmit}
-      />    
     </Box>
   );
 };
