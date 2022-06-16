@@ -15,7 +15,6 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import { ClientDetails } from './ClientDetails';
-import { ClientDialog } from './ClientDialog';
 
 import { styled } from '@mui/material/styles';
 
@@ -194,6 +193,7 @@ export const App = () => {
   });
 
   const [ createClient, { data, loading, error }] = useMutation(MUTATION_ADD_PERSON);
+  const [ changes, setChanges ] = useState(false);
 
 
   useEffect(() => {
@@ -217,20 +217,36 @@ export const App = () => {
               setClientIndex={setClientIndex} 
               clientList={clientList} 
               setClientList={setClientList}/>
-            <Button 
-              variant="contained"
-              onClick={(e) => {handleNewClientButtonClick(e, createClient, setClientIndex)}}
-              >New Client
-            </Button>              
+      
           </CardContent>
         </Card>
+        <Button 
+            variant="contained"
+            onClick={(e) => {handleNewClientButtonClick(e, createClient, setClientIndex)}}
+            >New Client
+          </Button>                
       </Item>
         
       <Item>
-        <ClientDetails 
-          client={displayedClient}
-          setClient={setDisplayedClient}
-        />
+        <Card >
+            <CardHeader title="Clients Details" />
+            <CardContent>
+              <ClientDetails 
+                client={displayedClient}
+                setClient={setDisplayedClient}
+                setChanges={setChanges}
+              />
+            </CardContent>
+          </Card>
+        <Button 
+          variant="contained" disabled={!changes} 
+          onClick={(e) => {
+            console.log("App: onClick: save changes button");
+            console.log("Client Changes: " + JSON.stringify(displayedClient));
+            setChanges(false);
+          }}
+          >Save Changes
+        </Button>               
       </Item>
     </Stack>
     </Box>
