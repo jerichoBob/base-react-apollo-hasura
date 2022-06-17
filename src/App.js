@@ -80,38 +80,72 @@ const MUTATION_ADD_PERSON = gql`
     $birth_day: Int, 
     $birth_month: Int, 
     $birth_year: Int) {
-  insert_people_one(object: {
-    first_name: $first_name,
-    last_name: $last_name
-    address_street: $address_street,
-    address_city: $address_city,
-    address_state: $address_state,
-    address_zip: $address_zip,
-    birth_day: $birth_day,
-    birth_month: $birth_month,
-    birth_year: $birth_year
-  }) {
-      index
-  }
-}
+      insert_people_one(object: {
+        first_name: $first_name,
+        last_name: $last_name
+        address_street: $address_street,
+        address_city: $address_city,
+        address_state: $address_state,
+        address_zip: $address_zip,
+        birth_day: $birth_day,
+        birth_month: $birth_month,
+        birth_year: $birth_year
+      }) {
+       index
+    }
+}`;
 
+// mutation toggleTodo ($id: Int!, $isCompleted: Boolean!) {
+//   update_todos(where: {id: {_eq: $id}}, _set: {is_completed: $isCompleted}) {
+//     affected_rows
+//   }
+// }
+const UPDATE_PERSON_BY_ID = gql`
+  mutation updatePerson(
+    $index: Int!,
+    $first_name: String, 
+    $last_name: String, 
+    $address_street: String, 
+    $address_state: String, 
+    $address_city: String, 
+    $address_zip: Int, 
+    $birth_day: Int, 
+    $birth_month: Int, 
+    $birth_year: Int) {
+      
+    update_people(
+      where: {index: {_eq: $index}}, 
+      _set: {
+        first_name: $first_name,
+        last_name: $last_name,
+        address_street: $address_street,
+        address_city: $address_city,
+        address_state: $address_state,
+        address_zip: $address_zip,
+        birth_day: $birth_day,
+        birth_month: $birth_month,
+        birth_year: $birth_year
+      }) {
+        affected_rows
+      }
+  }
 `;
 
 const ClientList = (props) => {
-  const {setClientIndex, clientList, setClientList} = props;
-  const { loading, error, data, networkStatus } = useQuery(
-    QUERY_GET_PEOPLE, {
-    notifyOnNetworkStatusChange: true,
-  });
+  const {setClientIndex, clientList, setClientList, data, networkStatus, loading, error } = props;
+
   const [selectedListIndex, setSelectedListIndex] = useState(1);
 
   useEffect(() => {
     if (data !== undefined && data.people !== undefined) {
-      // console.log("ClientList: useEffect: data: " + JSON.stringify(data));
-      setClientIndex(data.people[0].index);
-      setClientList(data.people);
+      // the other choice (if you don't want to sort here), is to have a "Sort by..." button in the UI
+      // That way the user can sort how and when they want, but only if they care.
+      let sortedList = [...data.people].sort((a, b) => a.index - b.index);
+      console.log("ClientList: useEffect: sortedList: " + JSON.stringify(sortedList));
+      setClientIndex(sortedList[0].index);
+      setClientList(sortedList);  
     }
-  }, [ setClientList, setClientIndex, data ]);
+  },  [setClientIndex, setClientList, data] );
   
   if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
   if (loading) return null;
@@ -123,7 +157,7 @@ const ClientList = (props) => {
         sx={{
           width: '100%',
           maxWidth: 360,
-          maxHeight: 200,
+          maxHeight: '100%',
           bgcolor: 'background.paper',
           position: 'relative',
           overflow: 'auto',
@@ -132,15 +166,13 @@ const ClientList = (props) => {
         subheader={<li />}
         divider={<Divider  flexItem />}
       >
-        {data.people.map((person, ndx, array) => {
+        {clientList.map((person, ndx, array) => {
           return(
           <div key={person.index}>
             <ListItem disablePadding>
               <ListItemButton
                 // onClick={(event) => handleClientSelection(data.people, ndx)}
                 onClick={() => {
-                  // console.log("ClientList: onClick: " + JSON.stringify(person));
-                  // console.log(JSON.stringify(person.index));
                   props.setClientIndex(person.index)
                   setSelectedListIndex(person.index);
                 }}
@@ -157,7 +189,6 @@ const ClientList = (props) => {
 };
 
 const handleNewClientButtonClick = (event, createClient, setClientIndex) => {
-  // console.log('handleNewClientButtonClick');
 
   const index = createClient({ variables: {
     first_name: faker.name.firstName(),
@@ -173,12 +204,8 @@ const handleNewClientButtonClick = (event, createClient, setClientIndex) => {
   //   console.log(result);
   // } 
   }});
-  // console.log("handleNewClientButtonClick: index: " + index);
   setClientIndex(index);
-
 }
-
-const onSubmit = (event, createClient) => {}
 
 export const App = () => {
 
@@ -192,9 +219,15 @@ export const App = () => {
     address_state: "",
   });
 
+  const { loading: fetchPeopleLoading, error: fetchPeopleError, data: fetchPeopleData, NetworkStatus: fetchPeopleNetworkStatus } = useQuery(
+    QUERY_GET_PEOPLE, {
+    notifyOnNetworkStatusChange: true,
+  });
+
   const [ createClient, { data, loading, error }] = useMutation(MUTATION_ADD_PERSON);
   const [ changes, setChanges ] = useState(false);
 
+  const [ updateClient, { data: updateData, loading: updateLoading, error: updateError }] = useMutation(UPDATE_PERSON_BY_ID);
 
   useEffect(() => {
     const person = clientList.find(thisClient => thisClient.index === clientIndex);
@@ -211,13 +244,17 @@ export const App = () => {
       >
       <Item>
         <Card sx={{ width: 345 }} >
-          <CardHeader title="Clients" />
+          <CardHeader title="Client List" />
           <CardContent>
             <ClientList 
               setClientIndex={setClientIndex} 
               clientList={clientList} 
-              setClientList={setClientList}/>
-      
+              setClientList={setClientList}
+              data={fetchPeopleData} 
+              networkStatus={fetchPeopleNetworkStatus}
+              loading={fetchPeopleLoading}
+              error={fetchPeopleError}
+              />
           </CardContent>
         </Card>
         <Button 
@@ -229,7 +266,7 @@ export const App = () => {
         
       <Item>
         <Card >
-            <CardHeader title="Clients Details" />
+            <CardHeader title="Client Details" />
             <CardContent>
               <ClientDetails 
                 client={displayedClient}
@@ -243,6 +280,23 @@ export const App = () => {
           onClick={(e) => {
             console.log("App: onClick: save changes button");
             console.log("Client Changes: " + JSON.stringify(displayedClient));
+            // so here is where we have to call mutate for the single record followed by a refetch
+            console.log(`displayedClient.index: ${displayedClient.index}`);
+
+            updateClient({ variables: {
+              index: displayedClient.index, 
+              first_name: displayedClient.first_name,
+              last_name: displayedClient.last_name,
+              address_street: displayedClient.address_street,
+              address_city: displayedClient.address_city,
+              address_state: displayedClient.address_state,
+              address_zip: displayedClient.address_zip,
+              birth_day: displayedClient.birth_day,
+              birth_month: displayedClient.birth_month,
+              birth_year: displayedClient.birth_year
+            }});
+            //   index: clientIndex,
+            //   first_name: displayedClient.first_name,
             setChanges(false);
           }}
           >Save Changes
