@@ -132,25 +132,9 @@ const UPDATE_PERSON_BY_ID = gql`
 `;
 
 const ClientList = (props) => {
-  const {setClientIndex, clientList, setClientList, data, networkStatus, loading, error } = props;
+  const {setClientIndex, clientList } = props;
 
   const [selectedListIndex, setSelectedListIndex] = useState(1);
-
-  useEffect(() => {
-    if (data !== undefined && data.people !== undefined) {
-      // the other choice (if you don't want to sort here), is to have a "Sort by..." button in the UI
-      // That way the user can sort how and when they want, but only if they care.
-      let sortedList = [...data.people].sort((a, b) => a.index - b.index);
-      console.log("ClientList: useEffect: sortedList: " + JSON.stringify(sortedList));
-      setClientIndex(sortedList[0].index);
-      setClientList(sortedList);  
-    }
-  },  [setClientIndex, setClientList, data] );
-  
-  if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
-  if (loading) return null;
-  if (error) return `Error! ${error}`;
-
 
   return (
       <List 
@@ -166,23 +150,24 @@ const ClientList = (props) => {
         subheader={<li />}
         divider={<Divider  flexItem />}
       >
-        {clientList.map((person, ndx, array) => {
+        {clientList.map((person) => {
           return(
-          <div key={person.index}>
-            <ListItem disablePadding>
-              <ListItemButton
-                // onClick={(event) => handleClientSelection(data.people, ndx)}
-                onClick={() => {
-                  props.setClientIndex(person.index)
-                  setSelectedListIndex(person.index);
-                }}
-                selected={selectedListIndex === person.index}
-              >
-                <ListItemText primary={`${person.first_name} ${person.last_name}`} />
-              </ListItemButton>
-            </ListItem>
-            {person.index < array.length && <Divider component="li" />}
-          </div> );         
+            <div key={person.index}>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    setClientIndex(person.index)
+                    setSelectedListIndex(person.index);
+                  }}
+                  selected={selectedListIndex === person.index}
+                >
+                  <ListItemText primary={`${person.first_name} ${person.last_name}`} />
+                </ListItemButton>
+              </ListItem>
+              <Divider component="li" />
+              {person.index < ClientList.length && <Divider component="li" />}
+            </div> 
+          );         
         })}
       </List>
   );
@@ -219,21 +204,36 @@ export const App = () => {
     address_state: "",
   });
 
-  const { loading: fetchPeopleLoading, error: fetchPeopleError, data: fetchPeopleData, NetworkStatus: fetchPeopleNetworkStatus } = useQuery(
+  const { loading, error, data, refetch, networkStatus } = useQuery(
     QUERY_GET_PEOPLE, {
     notifyOnNetworkStatusChange: true,
   });
 
-  const [ createClient, { data, loading, error }] = useMutation(MUTATION_ADD_PERSON);
+  const [ createClient ] = useMutation(MUTATION_ADD_PERSON);
+  const [ updateClient ] = useMutation(UPDATE_PERSON_BY_ID);
+
   const [ changes, setChanges ] = useState(false);
 
-  const [ updateClient, { data: updateData, loading: updateLoading, error: updateError }] = useMutation(UPDATE_PERSON_BY_ID);
+  useEffect(() => {
+    if (data !== undefined && data.people !== undefined) {
+      // the other choice (if you don't want to sort here), is to have a "Sort by..." button in the UI
+      // That way the user can sort how and when they want, but only if they care.
+      let sortedList = [...data.people].sort((a, b) => a.index - b.index);
+      console.log("ClientList: useEffect: sortedList: " + JSON.stringify(sortedList));
+      setClientIndex(sortedList[0].index);
+      setClientList(sortedList);  
+    }
+  },  [setClientIndex, setClientList, data] );
 
   useEffect(() => {
     const person = clientList.find(thisClient => thisClient.index === clientIndex);
     console.log("=== App: useEffect: person: " + JSON.stringify(person));
     setDisplayedClient(person);
   }, [ clientIndex, clientList ]);
+
+  // if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
+  // if (loading) return null;
+  if (error) return `Error! ${error}`;
 
   return(
     <Box sx={{ width: '100%', maxWidth: 800, bgcolor: 'background.paper', border: '1px dashed grey' }}>
@@ -249,11 +249,6 @@ export const App = () => {
             <ClientList 
               setClientIndex={setClientIndex} 
               clientList={clientList} 
-              setClientList={setClientList}
-              data={fetchPeopleData} 
-              networkStatus={fetchPeopleNetworkStatus}
-              loading={fetchPeopleLoading}
-              error={fetchPeopleError}
               />
           </CardContent>
         </Card>
@@ -275,14 +270,15 @@ export const App = () => {
               />
             </CardContent>
           </Card>
+        <Button
+          variant="contained"
+          onClick={(e) => {
+            refetch(); // gimme data
+          }}
+        >Refresh List</Button>
         <Button 
           variant="contained" disabled={!changes} 
           onClick={(e) => {
-            console.log("App: onClick: save changes button");
-            console.log("Client Changes: " + JSON.stringify(displayedClient));
-            // so here is where we have to call mutate for the single record followed by a refetch
-            console.log(`displayedClient.index: ${displayedClient.index}`);
-
             updateClient({ variables: {
               index: displayedClient.index, 
               first_name: displayedClient.first_name,
@@ -295,8 +291,16 @@ export const App = () => {
               birth_month: displayedClient.birth_month,
               birth_year: displayedClient.birth_year
             }});
-            //   index: clientIndex,
-            //   first_name: displayedClient.first_name,
+
+            // update clientList to include the above changes 
+            const newClientList = clientList.map(thisClient => {
+              if (thisClient.index === displayedClient.index) {
+                return displayedClient;
+              } else {
+                return thisClient;
+              }
+            });
+            setClientList(newClientList);
             setChanges(false);
           }}
           >Save Changes
