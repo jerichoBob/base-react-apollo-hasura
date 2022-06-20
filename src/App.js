@@ -253,10 +253,17 @@ export const App = () => {
           </CardContent>
         </Card>
         <Button 
-            variant="contained"
-            onClick={(e) => {handleNewClientButtonClick(e, createClient, setClientIndex)}}
-            >New Client
-          </Button>                
+          variant="contained"
+          onClick={(e) => {handleNewClientButtonClick(e, createClient, setClientIndex)}}
+        >New Client
+        </Button>   
+        <Button
+          style={{ marginLeft: '10px' }}
+          variant="contained"
+          onClick={(e) => {
+            refetch(); // gimme data
+          }}
+        >Refresh List</Button>        
       </Item>
         
       <Item>
@@ -270,12 +277,6 @@ export const App = () => {
               />
             </CardContent>
           </Card>
-        <Button
-          variant="contained"
-          onClick={(e) => {
-            refetch(); // gimme data
-          }}
-        >Refresh List</Button>
         <Button 
           variant="contained" disabled={!changes} 
           onClick={(e) => {
