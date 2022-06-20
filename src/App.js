@@ -1,6 +1,6 @@
 import './App.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ApolloClient,
   InMemoryCache, 
@@ -179,22 +179,21 @@ const ClientList = (props) => {
   );
 };
 
-const handleNewClientButtonClick = (event, createClient, setClientIndex) => {
+const handleSaveAsNewClient = async (currClient, createClient, setClientIndex) => {
 
-  const index = createClient({ variables: {
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    // address_street: "", 
-    // address_state: "", 
-    // address_city: "", 
-    // address_zip: 17172, 
-    // birth_day: 10, 
-    // birth_month: 10, 
-    // birth_year: 1904
-  //  })}.then(result => {  
-  //   console.log(result);
-  // } 
+  const index = await createClient({ variables: {
+    first_name: currClient.first_name,
+    last_name: currClient.last_name,
+    address_street: currClient.address_street,
+    address_city: currClient.address_city,
+    address_state: currClient.address_state,
+    address_zip: currClient.address_zip,
+    birth_day: currClient.birth_day,
+    birth_month: currClient.birth_month,
+    birth_year: currClient.birth_year
   }});
+
+  console.log(`newly added client index: ${index}`);
   setClientIndex(index);
 }
 
@@ -203,7 +202,7 @@ const handleNewClientButtonClick = (event, createClient, setClientIndex) => {
 const getNextIndex = (currIndex, clientList) => {
   let index = 0;
   if (clientList !== undefined && clientList.length > 0) {
-    for (let i = 0; i<clientList.length - 1; i++) {
+    for (let i = 0; i<=clientList.length - 1; i++) {
       index = clientList[i].index;
       if (clientList[i].index > currIndex) break;
     }
@@ -242,6 +241,7 @@ export const App = () => {
   const [ updateClient ] = useMutation(UPDATE_PERSON_BY_ID);
 
   const [ changes, setChanges ] = useState(false);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (data !== undefined && data.people !== undefined) {
@@ -249,7 +249,11 @@ export const App = () => {
       // That way the user can sort how and when they want, but only if they care.
       let sortedList = [...data.people].sort((a, b) => a.index - b.index);
       console.log("ClientList: useEffect: sortedList: " + JSON.stringify(sortedList));
-      setClientIndex(sortedList[0].index);
+      if (data && data.people && data.people.length > 0) {
+        setClientIndex(sortedList[0].index);
+        isFirstRender.current = false;
+      }
+  
       setClientList(sortedList);  
     }
   },  [setClientIndex, setClientList, data] );
@@ -282,11 +286,6 @@ export const App = () => {
               />
           </CardContent>
         </Card>
-        <Button 
-          variant="contained"
-          onClick={(e) => {handleNewClientButtonClick(e, createClient, setClientIndex)}}
-        >New Client
-        </Button>   
         <Button
           style={{ marginLeft: '10px' }}
           variant="contained"
@@ -335,7 +334,19 @@ export const App = () => {
             setChanges(false);
           }}
           >Save Changes
-        </Button>               
+        </Button>             
+        <Button 
+          variant="contained" disabled={!changes} 
+          style={{ marginLeft: '10px' }}
+          onClick={async(e) => {
+            await handleSaveAsNewClient(displayedClient, createClient, setClientIndex);
+            console.log("refetching");
+            await refetch(); // gimme data
+            console.log("refetching done. setting client index to end of (new?) list");
+            setClientIndex(clientList[clientList.length-1].index);
+          }}
+        >Save Changes As New Client
+        </Button>             
       </Item>
     </Stack>
     <Button 
