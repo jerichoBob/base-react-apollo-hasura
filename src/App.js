@@ -32,6 +32,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 
 import { faker } from '@faker-js/faker';
+import scrollIntoView from 'scroll-into-view';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -132,16 +133,14 @@ const UPDATE_PERSON_BY_ID = gql`
 `;
 
 const ClientList = (props) => {
-  const {setClientIndex, clientList } = props;
-
-  const [selectedListIndex, setSelectedListIndex] = useState(1);
+  const {clientIndex, setClientIndex, clientList } = props;
 
   return (
       <List 
         sx={{
           width: '100%',
           maxWidth: 360,
-          maxHeight: '100%',
+          maxHeight: 400,
           bgcolor: 'background.paper',
           position: 'relative',
           overflow: 'auto',
@@ -149,6 +148,7 @@ const ClientList = (props) => {
         }}
         subheader={<li />}
         divider={<Divider  flexItem />}
+        dense={false}
       >
         {clientList.map((person) => {
           return(
@@ -157,11 +157,17 @@ const ClientList = (props) => {
                 <ListItemButton
                   onClick={() => {
                     setClientIndex(person.index)
-                    setSelectedListIndex(person.index);
+                    // setSelectedListIndex(person.index);
                   }}
-                  selected={selectedListIndex === person.index}
+                  selected={clientIndex === person.index}
+                  ref={(node) => {
+                    if (clientIndex === person.index) {
+                      scrollIntoView(node);
+                    }
+                  }}
+
                 >
-                  <ListItemText primary={`${person.first_name} ${person.last_name}`} />
+                  <ListItemText primary={`(${person.index}) ${person.first_name} ${person.last_name}`} />
                 </ListItemButton>
               </ListItem>
               <Divider component="li" />
@@ -190,6 +196,29 @@ const handleNewClientButtonClick = (event, createClient, setClientIndex) => {
   // } 
   }});
   setClientIndex(index);
+}
+
+// next and prev depend complete on the sort order of clientList 
+//  - so if that changes, then the next and prev functions will need to change also
+const getNextIndex = (currIndex, clientList) => {
+  let index = 0;
+  if (clientList !== undefined && clientList.length > 0) {
+    for (let i = 0; i<clientList.length - 1; i++) {
+      index = clientList[i].index;
+      if (clientList[i].index > currIndex) break;
+    }
+  }
+  return index;
+}
+const getPrevIndex = (currIndex, clientList) => {
+  let index = 0;
+  if (clientList !== undefined && clientList.length > 0) {
+    for (let i = clientList.length - 1; i >= 0; i--) {
+      index = clientList[i].index;
+      if (clientList[i].index < currIndex) break;
+    }
+  }
+  return index;
 }
 
 export const App = () => {
@@ -247,6 +276,7 @@ export const App = () => {
           <CardHeader title="Client List" />
           <CardContent>
             <ClientList 
+              clientIndex={clientIndex}
               setClientIndex={setClientIndex} 
               clientList={clientList} 
               />
@@ -308,6 +338,45 @@ export const App = () => {
         </Button>               
       </Item>
     </Stack>
+    <Button 
+      variant="contained"
+      onClick={(e) => {
+        const firstIndex = clientList[0].index;
+        setClientIndex(firstIndex);
+        console.log(`clientIndex: ${firstIndex}`);
+      }}
+    >First
+    </Button>   
+    <Button 
+      variant="contained"
+      style={{ marginLeft: '10px' }}
+      onClick={(e) => {
+        const newIndex = getPrevIndex(clientIndex, clientList);
+        setClientIndex(newIndex);
+        console.log(`clientIndex: ${newIndex}`);
+      }}
+    >Prev
+    </Button>   
+    <Button 
+      variant="contained"
+      style={{ marginLeft: '10px' }}
+      onClick={(e) => {
+        const nextIndex = getNextIndex(clientIndex, clientList);
+        setClientIndex(nextIndex);
+        console.log(`nextIndex: ${nextIndex}`);
+      }}
+    >Next
+    </Button>   
+    <Button 
+      variant="contained"
+      style={{ marginLeft: '10px' }}
+      onClick={(e) => {
+        const lastIndex = clientList[clientList.length-1].index;
+        setClientIndex(lastIndex);
+        console.log(`nextIndex: ${lastIndex}`);
+      }}
+    >Last
+    </Button>       
     </Box>
   );
 };
