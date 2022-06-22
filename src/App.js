@@ -179,7 +179,7 @@ const ClientList = (props) => {
   );
 };
 
-const handleSaveAsNewClient = async (currClient, createClient, setClientIndex) => {
+const handleSaveAsNewClient = async (currClient, createClient,  setClientIndex) => {
 
   const index = await createClient({ variables: {
     first_name: currClient.first_name,
@@ -192,8 +192,6 @@ const handleSaveAsNewClient = async (currClient, createClient, setClientIndex) =
     birth_month: currClient.birth_month,
     birth_year: currClient.birth_year
   }});
-
-  console.log(`newly added client index: ${index}`);
   setClientIndex(index);
 }
 
@@ -250,7 +248,7 @@ export const App = () => {
       let sortedList = [...data.people].sort((a, b) => a.index - b.index);
       console.log("ClientList: useEffect: sortedList: " + JSON.stringify(sortedList));
       if (data && data.people && data.people.length > 0) {
-        setClientIndex(sortedList[0].index);
+        if (isFirstRender.current) setClientIndex(sortedList[0].index);
         isFirstRender.current = false;
       }
   
@@ -339,11 +337,29 @@ export const App = () => {
           variant="contained" disabled={!changes} 
           style={{ marginLeft: '10px' }}
           onClick={async(e) => {
-            await handleSaveAsNewClient(displayedClient, createClient, setClientIndex);
-            console.log("refetching");
-            await refetch(); // gimme data
-            console.log("refetching done. setting client index to end of (new?) list");
-            setClientIndex(clientList[clientList.length-1].index);
+            // await handleSaveAsNewClient(displayedClient, createClient, setClientIndex);
+            const newIndex = Math.random().toFixed(4) * 10000;
+            const newClient = {
+              index: newIndex,
+              first_name: displayedClient.first_name,
+              last_name: displayedClient.last_name,
+              address_street: displayedClient.address_street,
+              address_city: displayedClient.address_city,
+              address_state: displayedClient.address_state,
+              address_zip: displayedClient.address_zip,
+              birth_day: displayedClient.birth_day,
+              birth_month: displayedClient.birth_month,
+              birth_year: displayedClient.birth_year
+            };
+            setClientList([...clientList, newClient])
+
+
+            // const newIndex = clientList[clientList.length-1].index;
+            console.log(`refetching done. setting client index to ${newIndex}`);
+            setClientIndex(newIndex);
+
+            // console.log("refetching");
+            // await refetch(); // gimme data            
           }}
         >Save Changes As New Client
         </Button>             
