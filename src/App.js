@@ -33,6 +33,8 @@ import Stack from '@mui/material/Stack';
 
 import { faker } from '@faker-js/faker';
 import scrollIntoView from 'scroll-into-view';
+import { ExitToApp } from '@mui/icons-material';
+import { display } from '@mui/system';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -131,6 +133,26 @@ const UPDATE_PERSON_BY_ID = gql`
       }
   }
 `;
+const DELETE_PERSON_BY_ID = gql`
+  mutation Person($index: Int!) {
+    delete_people(
+      where: {index: {_eq: $index}}) {
+    affected_rows
+    returning {
+      index,
+      first_name,
+      last_name,
+      address_street,
+      address_city,
+      address_state,
+      address_zip,
+      birth_day,
+      birth_month,
+      birth_year
+    }
+  }    
+  }
+`;
 
 const ClientList = (props) => {
   const {clientIndex, setClientIndex, clientList } = props;
@@ -140,7 +162,7 @@ const ClientList = (props) => {
         sx={{
           width: '100%',
           maxWidth: 360,
-          maxHeight: 400,
+          maxHeight: 350,
           bgcolor: 'background.paper',
           position: 'relative',
           overflow: 'auto',
@@ -181,7 +203,8 @@ const ClientList = (props) => {
 
 const handleSaveAsNewClient = async (currClient, createClient,  setClientIndex) => {
 
-  const index = await createClient({ variables: {
+  let newIndex = 0;
+  await createClient({ variables: {
     first_name: currClient.first_name,
     last_name: currClient.last_name,
     address_street: currClient.address_street,
@@ -191,8 +214,30 @@ const handleSaveAsNewClient = async (currClient, createClient,  setClientIndex) 
     birth_day: currClient.birth_day,
     birth_month: currClient.birth_month,
     birth_year: currClient.birth_year
-  }});
-  setClientIndex(index);
+  }}).then((result)=> {
+    newIndex = result.data.insert_people_one.index;
+
+    console.log("response from graphql mutate: " + JSON.stringify(result.data.insert_people_one.index));
+    console.dir(result);
+  });
+
+  // setClientIndex(newIndex);
+  return newIndex;
+  // const newIndex = Math.random().toFixed(4) * 10000;
+  // const newClient = {
+  //   index: newIndex,
+  //   first_name: displayedClient.first_name,
+  //   last_name: displayedClient.last_name,
+  //   address_street: displayedClient.address_street,
+  //   address_city: displayedClient.address_city,
+  //   address_state: displayedClient.address_state,
+  //   address_zip: displayedClient.address_zip,
+  //   birth_day: displayedClient.birth_day,
+  //   birth_month: displayedClient.birth_month,
+  //   birth_year: displayedClient.birth_year
+  // };
+  // setClientList([...clientList, newClient])
+
 }
 
 // next and prev depend complete on the sort order of clientList 
@@ -220,7 +265,7 @@ const getPrevIndex = (currIndex, clientList) => {
 
 export const App = () => {
 
-  const [ clientIndex, setClientIndex ] = useState(0); 
+  const [ clientIndex, setClientIndex ] = useState(1); 
   const [ clientList, setClientList ] = useState([]);
   const [ displayedClient, setDisplayedClient ] = useState({
     first_name: "",
@@ -237,6 +282,7 @@ export const App = () => {
 
   const [ createClient ] = useMutation(MUTATION_ADD_PERSON);
   const [ updateClient ] = useMutation(UPDATE_PERSON_BY_ID);
+  const [ deleteClient ] = useMutation(DELETE_PERSON_BY_ID);
 
   const [ changes, setChanges ] = useState(false);
   const isFirstRender = useRef(true);
@@ -247,19 +293,24 @@ export const App = () => {
       // That way the user can sort how and when they want, but only if they care.
       let sortedList = [...data.people].sort((a, b) => a.index - b.index);
       console.log("ClientList: useEffect: sortedList: " + JSON.stringify(sortedList));
-      if (data && data.people && data.people.length > 0) {
+      if (data.people.length > 0) {
         if (isFirstRender.current) setClientIndex(sortedList[0].index);
         isFirstRender.current = false;
       }
-  
+
       setClientList(sortedList);  
     }
-  },  [setClientIndex, setClientList, data] );
+  },  [ data ] );
 
   useEffect(() => {
-    const person = clientList.find(thisClient => thisClient.index === clientIndex);
-    console.log("=== App: useEffect: person: " + JSON.stringify(person));
-    setDisplayedClient(person);
+    console.log(`clientIndex: ${clientIndex}`);
+    if (clientIndex !== undefined && clientList !== undefined && clientList.length>0) {
+      console.log("=== App: useEffect: clientList: " + JSON.stringify(clientList));    
+      const person = clientList.find(thisClient => thisClient.index === clientIndex);
+      console.log("=== App: useEffect: person: " + JSON.stringify(person));
+
+      if (person !== undefined) setDisplayedClient(person);
+    }
   }, [ clientIndex, clientList ]);
 
   // if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
@@ -291,6 +342,16 @@ export const App = () => {
             refetch(); // gimme data
           }}
         >Refresh List</Button>        
+        <Button
+          style={{ marginLeft: '10px' }}
+          variant="contained"
+          onClick={async(e) => {            
+            console.log(`Deleting client: ${displayedClient.index}`);
+            await deleteClient({variables: {index: displayedClient.index}});
+            await refetch(); // gimme data
+            await setClientIndex(clientList[0].index);
+          }}
+        >Delete Client</Button>           
       </Item>
         
       <Item>
@@ -336,30 +397,17 @@ export const App = () => {
         <Button 
           variant="contained" disabled={!changes} 
           style={{ marginLeft: '10px' }}
-          onClick={async(e) => {
-            // await handleSaveAsNewClient(displayedClient, createClient, setClientIndex);
-            const newIndex = Math.random().toFixed(4) * 10000;
-            const newClient = {
-              index: newIndex,
-              first_name: displayedClient.first_name,
-              last_name: displayedClient.last_name,
-              address_street: displayedClient.address_street,
-              address_city: displayedClient.address_city,
-              address_state: displayedClient.address_state,
-              address_zip: displayedClient.address_zip,
-              birth_day: displayedClient.birth_day,
-              birth_month: displayedClient.birth_month,
-              birth_year: displayedClient.birth_year
-            };
-            setClientList([...clientList, newClient])
+          onClick={ async(e) => {
+            console.log("--- starting handleSaveAsNewClient---")
+            const newIndex = await handleSaveAsNewClient(displayedClient, createClient, setClientIndex);
 
+            console.log("refetching");
+            await refetch(); // gimme data       
 
             // const newIndex = clientList[clientList.length-1].index;
             console.log(`refetching done. setting client index to ${newIndex}`);
             setClientIndex(newIndex);
-
-            // console.log("refetching");
-            // await refetch(); // gimme data            
+            console.log("--- finishing handleSaveAsNewClient---")
           }}
         >Save Changes As New Client
         </Button>             
@@ -367,6 +415,7 @@ export const App = () => {
     </Stack>
     <Button 
       variant="contained"
+      style={{ marginLeft: '10px' }}
       onClick={(e) => {
         const firstIndex = clientList[0].index;
         setClientIndex(firstIndex);
