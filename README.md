@@ -19,11 +19,11 @@ I didn't do much for the initial Hasura setup.
 4. I inserted 2 rows of data to represent my 2 clients
 
 Kinda like this:
-![Hashura](/public/hashura-db.png)
+![Hasura](/public/hasura-db.png)
 
 The tech stack so far looks like this:
 
-* **Hashura** - 
+* **Hasura** - 
 * **Apollo Client**
   * don't forget to set the headers or you won't be able to access the data
 * **MUI** - because I like the clean look of MD and this library is easy and stable
