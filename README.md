@@ -23,9 +23,11 @@ Kinda like this:
 
 The tech stack so far looks like this:
 
-* **Hasura** - 
-* **Apollo Client**
-  * don't forget to set the headers or you won't be able to access the data
+* **Hasura** - for the back-end database/tables and the GraphQL Serverside API
+* **Apollo Client** - great library (duh) for talking GraphQL
+  * note: don't forget to set the headers or the API won't allow your request to get through
+    * content-type: application-json
+    * x-hasura-admin-secret: base64-encoded secret
 * **MUI** - because I like the clean look of MD and this library is easy and stable
 * 
 
