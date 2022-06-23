@@ -32,6 +32,7 @@ The tech stack so far looks like this:
 * 
 
 # Features
+This is all future-state stuff - please ignore.
 * Client Info
   * Name
   * Address
@@ -51,9 +52,10 @@ The tech stack so far looks like this:
     * alteration
       * ? 
       * ?
-    * custom build
+    * Custom Build
       * ?
       * ?
+  * Measurements
   * Hours Estimated
     * range of times based on previous jobs to select from
   * Hours spent
@@ -62,3 +64,5 @@ The tech stack so far looks like this:
     * actual $ amount spent for the job 
     * calculate $/hr rate (for job type)
 * Gallery
+  * Before
+  * After
