@@ -25,20 +25,33 @@ The tech stack so far looks like this:
 * ReactMD - because I like the clean look of MD and these components
 
 # Features
-
-* description of dress
-* work type / occasion / source
+* Client Info
+  * Name
+  * Address
+  * Phone
+* Description of dress
+* Event type
   * Wedding
   * Debutante
+* Date of Event
+* Source
   * Kannons
-* job type
-  * simple alteration
-  * custom fit
-  * hours estimated
+  * Website / FB
+  * Gowns Going Green
+  * Other
+* Jobs
+  * Job type -- needs input from Lacey
+    * alteration
+      * ? 
+      * ?
+    * custom build
+      * ?
+      * ?
+  * Hours Estimated
     * range of times based on previous jobs to select from
-  * actual hours spent
-  * $ amount
+  * Hours spent
+  * $ Cost
     * estimated $ amount for the job
     * actual $ amount spent for the job 
     * calculate $/hr rate (for job type)
-* gallery
+* Gallery
